@@ -28,9 +28,9 @@ try:
     # For a peek, you can query for something very generic or retrieve by known IDs if you have them.
     # A more common use case is querying with actual text:
     results = collection.query(
-        query_texts=["introduction to science"], # Example query
+        query_texts=["sports"], # Example query
         n_results=2 # Number of results to fetch
-    )
+    ) 
     print("\nExample query results:")
     if results and results.get('documents'):
         for i, doc in enumerate(results['documents'][0]):
