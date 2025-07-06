@@ -14,6 +14,12 @@ import {
   Palette,
   Laptop,
   CircleDot,
+  Languages,
+  Heart,
+  Star,
+  Briefcase,
+  Activity,
+  Wrench,
 } from "lucide-react"
 
 interface SubjectIconProps {
@@ -24,15 +30,10 @@ interface SubjectIconProps {
 export default function SubjectIcon({ subject, size = "normal" }: SubjectIconProps) {
   const getIconAndColor = () => {
     switch (subject) {
-      case "all":
-        return {
-          icon: <CircleDot size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
-          color: "bg-red-100 dark:bg-red-900/30",
-        }
-      case "english":
+      case "english-language":
         return {
           icon: <BookOpen size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
-          color: "bg-purple-100 dark:bg-purple-900/30",
+          color: "bg-blue-100 dark:bg-blue-900/30",
         }
       case "mathematics":
         return {
@@ -49,6 +50,46 @@ export default function SubjectIcon({ subject, size = "normal" }: SubjectIconPro
           icon: <Globe size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
           color: "bg-orange-100 dark:bg-orange-900/30",
         }
+      case "french-language":
+        return {
+          icon: <Languages size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
+          color: "bg-blue-100 dark:bg-blue-900/30",
+        }
+      case "arabic":
+        return {
+          icon: <Star size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
+          color: "bg-yellow-100 dark:bg-yellow-900/30",
+        }
+      case "ghanaian-language":
+        return {
+          icon: <Languages size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
+          color: "bg-green-100 dark:bg-green-900/30",
+        }
+      case "physical-education":
+        return {
+          icon: <Activity size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
+          color: "bg-red-100 dark:bg-red-900/30",
+        }
+      case "religious-moral-education":
+        return {
+          icon: <Star size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
+          color: "bg-purple-100 dark:bg-purple-900/30",
+        }
+      case "creative-arts":
+        return {
+          icon: <Palette size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
+          color: "bg-yellow-100 dark:bg-yellow-900/30",
+        }
+      case "career-technology":
+        return {
+          icon: <Briefcase size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
+          color: "bg-teal-100 dark:bg-teal-900/30",
+        }
+      case "computing":
+        return {
+          icon: <Laptop size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
+          color: "bg-purple-100 dark:bg-purple-900/30",
+        }
       case "coding":
         return {
           icon: <Code size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
@@ -58,6 +99,17 @@ export default function SubjectIcon({ subject, size = "normal" }: SubjectIconPro
         return {
           icon: <Map size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
           color: "bg-green-100 dark:bg-green-900/30",
+        }
+      // Legacy cases for backward compatibility
+      case "all":
+        return {
+          icon: <CircleDot size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
+          color: "bg-red-100 dark:bg-red-900/30",
+        }
+      case "english":
+        return {
+          icon: <BookOpen size={size === "large" ? 40 : 24} className="text-gray-700 dark:text-gray-300" />,
+          color: "bg-purple-100 dark:bg-purple-900/30",
         }
       case "physics":
         return {

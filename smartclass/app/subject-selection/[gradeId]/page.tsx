@@ -1,14 +1,15 @@
 "use client"
 
+import { use } from "react"
 import { useRouter } from "next/navigation"
 import { subjects } from "@/data/subjects"
 import { grades } from "@/data/grades"
 import SubjectIcon from "@/components/subject-icon"
 import { ArrowLeft } from "lucide-react"
 
-export default function SubjectSelectionPage({ params }: { params: { gradeId: string } }) {
+export default function SubjectSelectionPage({ params }: { params: Promise<{ gradeId: string }> }) {
   const router = useRouter()
-  const { gradeId } = params
+  const { gradeId } = use(params)
 
   const grade = grades.find((g) => g.id === gradeId)
 

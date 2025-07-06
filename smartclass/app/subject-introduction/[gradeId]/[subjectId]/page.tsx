@@ -1,5 +1,6 @@
 "use client"
 
+import { use } from "react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -11,10 +12,10 @@ import { ThemeToggle } from "@/components/theme-toggle"
 export default function SubjectIntroductionPage({
   params,
 }: {
-  params: { gradeId: string; subjectId: string }
+  params: Promise<{ gradeId: string; subjectId: string }>
 }) {
   const router = useRouter()
-  const { gradeId, subjectId } = params
+  const { gradeId, subjectId } = use(params)
   const [activeTab, setActiveTab] = useState("lessons")
 
   const subject = subjects.find((s) => s.id === subjectId)
@@ -31,14 +32,30 @@ export default function SubjectIntroductionPage({
   // Get subject description or a default one
   const getSubjectDescription = () => {
     switch (subjectId) {
+      case "english-language":
+        return "Develop reading, writing, and communication skills through engaging with diverse texts and creative expression."
       case "mathematics":
         return "Explore numbers, patterns, and problem-solving techniques that form the foundation of mathematical thinking."
-      case "english":
-        return "Develop reading, writing, and communication skills through engaging with diverse texts and creative expression."
       case "science":
         return "Discover the natural world through observation, experimentation, and understanding scientific principles."
       case "social-studies":
         return "Understand societies, cultures, and human interactions across time and geography."
+      case "french-language":
+        return "Learn French language skills including speaking, reading, writing, and cultural understanding."
+      case "arabic":
+        return "Study Arabic language, script, and cultural heritage with focus on communication skills."
+      case "ghanaian-language":
+        return "Explore local Ghanaian languages, traditions, and cultural heritage."
+      case "physical-education":
+        return "Develop physical fitness, sports skills, and healthy lifestyle habits."
+      case "religious-moral-education":
+        return "Explore ethical values, moral principles, and spiritual development."
+      case "creative-arts":
+        return "Express creativity through visual arts, music, drama, and design."
+      case "career-technology":
+        return "Learn practical skills and technology for future career preparation."
+      case "computing":
+        return "Master computer science fundamentals and digital technology skills."
       case "coding":
         return "Learn programming fundamentals and computational thinking through hands-on coding exercises."
       case "maps":
@@ -50,7 +67,38 @@ export default function SubjectIntroductionPage({
 
   // Get subject image based on subject ID
   const getSubjectImage = () => {
-    return `/placeholder.svg?height=400&width=600&text=${subject?.name || "Subject"}`
+    switch (subjectId) {
+      case "english-language":
+        return "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800&h=400&fit=crop&crop=center"
+      case "mathematics":
+        return "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&h=400&fit=crop&crop=center"
+      case "science":
+        return "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&h=400&fit=crop&crop=center"
+      case "social-studies":
+        return "https://images.unsplash.com/photo-1636865266989-58043bceaa71?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D?w=800&h=400&fit=crop&crop=center"
+      case "french-language":
+        return "https://plus.unsplash.com/premium_photo-1663036583472-84bee4a90090?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D?w=800&h=400&fit=crop&crop=center"
+      case "arabic":
+        return "https://plus.unsplash.com/premium_photo-1677966719936-3de1c1d94421?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D?w=800&h=400&fit=crop&crop=center"
+      case "ghanaian-language":
+        return "https://images.unsplash.com/photo-1515658323406-25d61c141a6e?q=80&w=709&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      case "physical-education":
+        return "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop&crop=center"
+      case "religious-moral-education":
+        return "https://plus.unsplash.com/premium_vector-1724847824230-914e6e4ecdcc?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D?w=800&h=400&fit=crop&crop=center"
+      case "creative-arts":
+        return "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&h=400&fit=crop&crop=center"
+      case "career-technology":
+        return "https://images.unsplash.com/photo-1581092335397-9583eb92d232?w=800&h=400&fit=crop&crop=center"
+      case "computing":
+        return "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=800&h=400&fit=crop&crop=center"
+      case "coding":
+        return "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=400&fit=crop&crop=center"
+      case "maps":
+        return "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1174&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D?w=800&h=400&fit=crop&crop=center"
+      default:
+        return `https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=400&fit=crop&crop=center`
+    }
   }
 
   return (
@@ -72,7 +120,7 @@ export default function SubjectIntroductionPage({
         <div className="h-[70vh] bg-gray-900 relative overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center">
             <img
-              src={getSubjectImage() || "/placeholder.svg"}
+              src={getSubjectImage()}
               alt={subject?.name || "Subject"}
               className="w-full h-full object-cover opacity-40"
             />
@@ -91,17 +139,6 @@ export default function SubjectIntroductionPage({
           >
             START CLASS
           </Button>
-
-          <div className="flex justify-center mt-6 gap-8">
-            <button className="flex flex-col items-center text-sm text-gray-300 hover:text-white">
-              <Play size={20} className="mb-1" />
-              TRAILER
-            </button>
-            <button className="flex flex-col items-center text-sm text-gray-300 hover:text-white">
-              <BookmarkPlus size={20} className="mb-1" />
-              MY LIST
-            </button>
-          </div>
 
           {/* Tabs */}
           <div className="mt-10 border-b border-gray-800">

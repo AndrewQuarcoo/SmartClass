@@ -6,7 +6,8 @@ import ContentCard from "@/components/content-card"
 import QuizCard from "@/components/quiz-card"
 import { grades } from "@/data/grades"
 import { subjects } from "@/data/subjects"
-import { topics, getContentForSubtopic, getQuizForTopic } from "@/data/topics"
+import { topics } from "@/data/topics"
+import { getAIContentForSubtopic, getAIQuizForTopic, isAIContentAvailable, AIContentCard, AIQuizQuestion } from "@/data/ai-content"
 import CompletionScreen from "@/components/completion-screen"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft } from "lucide-react"
@@ -41,23 +42,53 @@ export default function ContentPage({
   const [showAchievement, setShowAchievement] = useState(false)
   const [achievementData, setAchievementData] = useState({ title: "", description: "", xp: 0 })
 
+  // AI content state
+  const [content, setContent] = useState<AIContentCard[]>([])
+  const [mainQuiz, setMainQuiz] = useState<AIQuizQuestion[]>([])
+  const [examQuiz, setExamQuiz] = useState<AIQuizQuestion[]>([])
+  const [aiServiceStatus, setAiServiceStatus] = useState<string>('')
+
   const grade = grades.find((g) => g.id === gradeId)
   const subject = subjects.find((s) => s.id === subjectId)
   const topic = topics.find((t) => t.id === topicId)
   const subtopic = topic?.subtopics.find((s) => s.id === subtopicId)
 
-  const content = getContentForSubtopic(subtopicId)
-  const mainQuiz = getQuizForTopic(topicId, "main")
-  const examQuiz = getQuizForTopic(topicId, "exam")
-
+  // Load AI content when component mounts or subtopic changes
   useEffect(() => {
+    const loadAIContent = async () => {
+      setIsLoading(true)
+      
+      try {
+        // Check AI service status
+        const status = await isAIContentAvailable()
+        setAiServiceStatus(status.message)
+        
+        // Load content and quizzes
+        const [contentData, mainQuizData, examQuizData] = await Promise.all([
+          getAIContentForSubtopic(subtopicId, topicId, subjectId, gradeId, 5),
+          getAIQuizForTopic(topicId, subtopicId, subjectId, gradeId, "main"),
+          getAIQuizForTopic(topicId, subtopicId, subjectId, gradeId, "exam")
+        ])
+        
+        setContent(contentData)
+        setMainQuiz(mainQuizData)
+        setExamQuiz(examQuizData)
+      } catch (error) {
+        console.error('Error loading AI content:', error)
+        setAiServiceStatus('Error loading content. Using fallback.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
     // Reset state when navigating to a new subtopic
     setContentState("intro")
     setCurrentCardIndex(0)
     setQuizAnswers({})
     setQuizResults({})
-    setIsLoading(false)
-  }, [subtopicId])
+    
+    loadAIContent()
+  }, [subtopicId, topicId, subjectId, gradeId])
 
   useEffect(() => {
     if (contentState === "thank-you") {
@@ -119,21 +150,39 @@ export default function ContentPage({
     },
   ]
 
+  // Helper functions to convert AI types to component-expected types
+  const convertQuizForComponent = (quiz: AIQuizQuestion[]) => {
+    return quiz.map(q => ({
+      question: q.question,
+      options: q.options || [],
+      correctAnswer: q.correct_answer,
+      explanation: q.explanation
+    }))
+  }
+
+  const convertContentForComponent = (content: AIContentCard[]) => {
+    return content.map(c => ({
+      title: c.title,
+      body: c.body,
+      image: c.image
+    }))
+  }
+
   // Determine the current content based on state
   const currentContent = (() => {
     switch (contentState) {
       case "intro":
         return introContent
       case "content":
-        return content
+        return convertContentForComponent(content)
       case "thank-you":
         return thankYouContent
       case "main-quiz":
       case "main-quiz-review":
-        return mainQuiz
+        return convertQuizForComponent(mainQuiz)
       case "exam-practice":
       case "exam-review":
-        return examQuiz
+        return convertQuizForComponent(examQuiz)
       default:
         return []
     }
@@ -181,10 +230,10 @@ export default function ContentPage({
     }
   }
 
-  const evaluateQuiz = (quiz: any[]) => {
+  const evaluateQuiz = (quiz: AIQuizQuestion[]) => {
     const results: Record<number, boolean> = {}
     quiz.forEach((question, index) => {
-      results[index] = quizAnswers[index] === question.correctAnswer
+      results[index] = quizAnswers[index] === question.correct_answer
     })
     setQuizResults(results)
   }
@@ -226,8 +275,14 @@ export default function ContentPage({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col items-center justify-center space-y-4">
         <div className="text-xl dark:text-white">Loading content...</div>
+        {aiServiceStatus && (
+          <div className="text-sm text-gray-600 dark:text-gray-400 text-center max-w-md">
+            {aiServiceStatus}
+          </div>
+        )}
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
       </div>
     )
   }
@@ -287,35 +342,36 @@ export default function ContentPage({
             transition={{ duration: 0.3 }}
             className="flex justify-center"
           >
-            {currentContent[currentCardIndex] &&
-              (["intro", "content", "thank-you"].includes(contentState) ? (
-                <ContentCard
-                  content={currentContent[currentCardIndex]}
-                  onNext={handleNextCard}
-                  totalCards={currentContent.length}
-                  currentCard={currentCardIndex + 1}
-                />
-              ) : ["main-quiz", "exam-practice"].includes(contentState) ? (
-                <QuizCard
-                  question={currentContent[currentCardIndex]}
-                  selectedAnswer={quizAnswers[currentCardIndex] || ""}
-                  onAnswerSelect={(answer) => handleAnswerSelect(currentCardIndex, answer)}
-                  onNext={handleNextCard}
-                  totalQuestions={currentContent.length}
-                  currentQuestion={currentCardIndex + 1}
-                  isReview={false}
-                />
-              ) : (
-                <QuizCard
-                  question={currentContent[currentCardIndex]}
-                  selectedAnswer={quizAnswers[currentCardIndex] || ""}
-                  isCorrect={quizResults[currentCardIndex]}
-                  onNext={handleNextCard}
-                  totalQuestions={currentContent.length}
-                  currentQuestion={currentCardIndex + 1}
-                  isReview={true}
-                />
-              ))}
+            {(["intro", "content", "thank-you"].includes(contentState) && currentContent[currentCardIndex]) && (
+              <ContentCard
+                content={currentContent[currentCardIndex] as { title: string; body: string; image?: string }}
+                onNext={handleNextCard}
+                totalCards={currentContent.length}
+                currentCard={currentCardIndex + 1}
+              />
+            )}
+            {(["main-quiz", "exam-practice"].includes(contentState) && currentContent[currentCardIndex]) && (
+              <QuizCard
+                question={currentContent[currentCardIndex] as { question: string; options: string[]; correctAnswer: string; explanation: string }}
+                selectedAnswer={quizAnswers[currentCardIndex] || ""}
+                onAnswerSelect={(answer) => handleAnswerSelect(currentCardIndex, answer)}
+                onNext={handleNextCard}
+                totalQuestions={currentContent.length}
+                currentQuestion={currentCardIndex + 1}
+                isReview={false}
+              />
+            )}
+            {(["main-quiz-review", "exam-review"].includes(contentState) && currentContent[currentCardIndex]) && (
+              <QuizCard
+                question={currentContent[currentCardIndex] as { question: string; options: string[]; correctAnswer: string; explanation: string }}
+                selectedAnswer={quizAnswers[currentCardIndex] || ""}
+                isCorrect={quizResults[currentCardIndex]}
+                onNext={handleNextCard}
+                totalQuestions={currentContent.length}
+                currentQuestion={currentCardIndex + 1}
+                isReview={true}
+              />
+            )}
           </motion.div>
         </AnimatePresence>
         {showAchievement && (
